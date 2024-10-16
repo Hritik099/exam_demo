@@ -1,31 +1,27 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.8-alpine'  // Using a lightweight Python Docker image
+            label 'docker-agent'       // Optional label for specific agent
+        }
+    }
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the code from GitHub
                 checkout scm
             }
         }
-        stage('Build') {
+        stage('Build and Test') {
             steps {
-                // Install Python if not installed already (in case Docker is not being used)
-                sh 'python3 --version || sudo apt-get install -y python3'
-                // Ensure pip is installed
-                sh 'python3 -m ensurepip --upgrade'
-            }
-        }
-        stage('Test') {
-            steps {
-                // Run the Python Hello World script
-                sh 'python3 hello.py'
+                echo 'Building the application...'
+                sh 'python hello.py'
             }
         }
     }
     post {
         always {
-            // Archive logs or results if needed
             archiveArtifacts artifacts: '**/hello.py', allowEmptyArchive: true
+            echo 'Pipeline finished. Done!'
         }
     }
 }
